@@ -1,0 +1,3 @@
+
+
+apt-get install autotools libopencv-dev libconfig-dev 
