@@ -15,7 +15,7 @@ AC_MSG_CHECKING(checking for OpenCV.)
 CPPFLAGS="$CPPFLAGS  -I/usr/include/opencv -I/usr/local/include -L/usr/local/lib -I/usr/include -L/usr/lib"
 LIBS="$LIBS -lopencv_highgui -lopencv_core -lopencv_imgproc -lopencv_objdetect -lopencv_video -lopencv_features2d -lopencv_legacy -lopencv_legacy -lopencv_calib3d -lopencv_flann  -lm"
 CPPFLAGS="$CPPFLAGS  -D__STDC_CONSTANT_MACROS -fpermissive -pg  -I/usr/include "
-LIBS="$LIBS -L/usr/lib -L/usr/lib/x86_64-linux-gnu -pthread  -ldl -lrt -lz -lm -lavutil -lavcodec  -lavformat -lavfilter -lswscale -lasound -lbz2"
+LIBS="$LIBS -L/usr/lib -L/usr/lib/x86_64-linux-gnu -pthread  -ldl -lrt -lz -lm -lavutil -lavcodec  -lavformat -lavfilter -lswscale -lasound -lbz2 -lconfig"
 
 
 #LIBS="$LIBS -lopencv_highgui -lopencv_core -lopencv_imgproc -lopencv_objdetect -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_flann  -lm -ldecodeqr -lavutil -lavcodec  -lavformat -lavfilter -lavdevice"

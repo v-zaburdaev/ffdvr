@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
+#include <libconfig.h>
 
 //#include <SDL.h>
 
@@ -43,6 +45,7 @@ using namespace std;
 static int SENSETIVITY_MOTION_PIX=120;
 static int SENSETIVITY_FRAME_COUNT=10;
 
+void start_cam(char* camurl, char* output_dir, int motion_detect_pix, int motion_detect_frames);
 
 
 static AVFormatContext *fmt_ctx = NULL;
@@ -66,6 +69,67 @@ int record_frames=0;
 static IplImage *_previous_img = NULL;
 static IplImage *m_bluredImage = NULL;
 static IplImage *mask = NULL;
+
+void read_config()
+{
+FILE *config_file;
+config_t cfg;
+const char *str;
+config_setting_t *setting;
+
+config_init(&cfg);
+if (!config_read_file(&cfg,"ffdvr.conf"))
+{
+  fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+            config_error_line(&cfg), config_error_text(&cfg));
+    config_destroy(&cfg);
+    return(EXIT_FAILURE);
+}
+
+ if(config_lookup_string(&cfg, "name", &str))
+    printf("Store name: %s\n\n", str);
+  else
+    fprintf(stderr, "No 'name' setting in configuration file.\n");
+
+setting = config_lookup(&cfg, "camera");
+  if(setting != NULL)
+  {
+    int count = config_setting_length(setting);
+    int i;
+     for(i = 0; i < count; ++i)
+        {
+printf("1\n");
+	  config_setting_t *cam = config_setting_get_elem(setting, i);
+	  const char *url, *name, *output_dir;
+	  int motion_detect_pix;
+	  int motion_detect_frames;
+	    
+	    
+	    
+	    
+	    
+	  if((config_setting_lookup_string(cam, "url", &url) && config_setting_lookup_string(cam, "name", &name) && 
+	    config_setting_lookup_string(cam, "output_dir", &output_dir) &&
+	    config_setting_lookup_int(cam, "motion_detect_pix", &motion_detect_pix) &&
+	    config_setting_lookup_int(cam, "motion_detect_frames", &motion_detect_frames))) 
+		{
+		printf("%s %s %s %3d %3d\n", name, url, output_dir, motion_detect_pix, motion_detect_frames); 
+
+		start_cam(url, output_dir, motion_detect_pix, motion_detect_frames);
+
+		}
+;
+
+	}
+
+  }
+
+
+
+
+}
+
+
 
 int motion_detect(IplImage *src)
 {
@@ -165,7 +229,7 @@ static void close_video(AVFormatContext *oc, AVStream *st)
 //    av_free(frame);
 }
 
-int openCreateNewFile(AVFrame *src,AVPacket pkt)
+int openCreateNewFile(AVFrame *src,AVPacket pkt, char* out_dir)
 {
     // Новый файл
     char *outfilename;
@@ -175,7 +239,7 @@ int openCreateNewFile(AVFrame *src,AVPacket pkt)
     outfilename = (char*)malloc(255);
     time_t t(time(NULL));// current time
     tm tm(*localtime(&t));
-    sprintf(outfilename,"outfile_%d_%d_%d_%d_%d_%d.mp4",tm.tm_year+1900,tm.tm_mon,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+    sprintf(outfilename,"%s/outfile_%d_%d_%d_%d_%d_%d.mp4",out_dir,tm.tm_year+1900,tm.tm_mon,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
 
     record_frames=max_record_frames;
     printf("open out file\n");
@@ -233,15 +297,12 @@ int openCreateNewFile(AVFrame *src,AVPacket pkt)
 first_frame=1;
 }
 
-int main(int argc, char **argv)
+void start_cam(char* url, char* output_dir, int motion_detect_pix, int motion_detect_frames)
 {
-    const char *filename; //,*outfilename;
-//    filename = "/home/vz/workspace/20120824_165616.mp4";
-    filename = "rtsp://192.168.1.101:554/ch0_0.h264";//argv[1];
-//    outfilename=malloc(255);
+    const char *filename; 
+    filename = url;
     int err;
     int motion_pixels;
-    //uint8_t buf[64];
     char* buf=(char*)malloc(64);
     uint8_t *outbuf;
     static float mux_preload= 1.5;
@@ -348,16 +409,16 @@ int main(int argc, char **argv)
                 motion_pixels=motion_detect(dst);
                 printf("motion pixels=%d record_frames=%d  pktflag=%d first=%d motion_framds=%d\n",motion_pixels,record_frames,packet.flags,first_frame, motion_frames);
 
-                if (motion_pixels>=SENSETIVITY_MOTION_PIX)
+                if (motion_pixels>=motion_detect_pix)
                     {
 		    motion_frames++;
-		    if (motion_frames>=SENSETIVITY_FRAME_COUNT) {
+		    if (motion_frames>=motion_detect_frames) {
                     // start record
                     if(record_frames==0)
                         {
                         /// Открыть файл для записи
                            if (starting_frames_count==0){
-                            openCreateNewFile(frame,packet);
+                            openCreateNewFile(frame,packet,output_dir);
                             record_frames=max_record_frames;
                             }
                         } else
@@ -429,5 +490,12 @@ motion_frames=0;
     return 0;
 
 
+
+}
+
+int main(int argc, char **argv)
+{
+
+read_config();
     return 0;
 }
