@@ -23,6 +23,10 @@ LIBS="$LIBS -L/usr/lib -L/usr/lib/x86_64-linux-gnu -pthread  -ldl -lrt -lz -lm -
 
 #AC_CHECK_HEADERS([opencv2/core/core_c.h], [], [AC_MSG_ERROR("openCV header missing")],[])
 
+ PKG_CHECK_MODULES([libconfig], [libconfig >= 1.4],,
+       AC_MSG_ERROR([libconfig 1.4 or newer not found.])
+     )
+
 # Checks for libraries.
 #AC_CHECK_LIB(opencv_core,cvCreateImage,LIBCV=-lopencv_core,)
 #if test -z "$LIBCV"; then

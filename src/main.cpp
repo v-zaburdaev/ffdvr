@@ -320,7 +320,7 @@ void start_cam(char* url, char* output_dir, int motion_detect_pix, int motion_de
 	printf("buf=%s\n",buf);
     IplImage* dst=NULL;
     char recording=0;
-    int record_frames;
+    int record_frames=0;
     /* register all the codecs */
     av_register_all();
     avformat_network_init();
