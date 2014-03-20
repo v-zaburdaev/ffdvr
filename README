@@ -1,6 +1,5 @@
 
-
-apt-get install autotools libopencv-dev libconfig-dev 
+apt-get install autoconf libopencv-dev libconfig-dev 
 
 
 autoreconf -i
