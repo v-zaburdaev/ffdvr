@@ -1,5 +1,4 @@
-
-apt-get install autoconf libopencv-dev libconfig-dev 
+apt-get install autoconf libopencv-dev libconfig-dev libavfilter-dev libasound-dev libbz2-dev 
 
 
 autoreconf -i
